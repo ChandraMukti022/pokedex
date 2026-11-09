@@ -1,4 +1,5 @@
 import { formatName } from '../utils/pokemon'
+import TypeBadge from './TypeBadge'
 
 interface TypeFilterProps {
   types: string[]
@@ -7,21 +8,46 @@ interface TypeFilterProps {
   disabled?: boolean
 }
 
+// Filter type: grid rapi (18 type = 6 kolom x 3 baris). Klik type aktif lagi untuk membatalkan.
 export default function TypeFilter({ types, value, onChange, disabled }: TypeFilterProps) {
+  const gridClass = 'grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6'
+
+  // Saat daftar type belum datang: kerangka supaya header tidak melompat
+  if (disabled && types.length === 0) {
+    return (
+      <div className={gridClass} aria-hidden="true">
+        {Array.from({ length: 18 }, (_, i) => (
+          <div key={i} className="aspect-[5/1] animate-pulse rounded-full bg-white/50" />
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <select
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      disabled={disabled}
-      aria-label="Filter berdasarkan type"
-      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none disabled:opacity-50 sm:w-48"
-    >
-      <option value="">Semua type</option>
-      {types.map((type) => (
-        <option key={type} value={type}>
-          {formatName(type)}
-        </option>
-      ))}
-    </select>
+    <div role="group" aria-label="Filter berdasarkan type" className={gridClass}>
+      {types.map((type) => {
+        const isActive = value === type
+
+        return (
+          <button
+            key={type}
+            type="button"
+            onClick={() => onChange(isActive ? '' : type)}
+            disabled={disabled}
+            aria-pressed={isActive}
+            aria-label={formatName(type)}
+            className={`rounded-full transition disabled:opacity-50 ${
+              isActive
+                ? 'ring-2 ring-gray-900 ring-offset-2'
+                : value
+                  ? 'opacity-60 hover:-translate-y-0.5 hover:opacity-100'
+                  : 'hover:-translate-y-0.5'
+            }`}
+          >
+            <TypeBadge type={type} className="aspect-[5/1] w-full" />
+          </button>
+        )
+      })}
+    </div>
   )
 }

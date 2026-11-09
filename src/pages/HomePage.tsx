@@ -1,160 +1,118 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { usePokemonIndex } from '../hooks/usePokemonIndex'
-import { usePokemonIdsByType } from '../hooks/usePokemonIdsByType'
 import { useTypes } from '../hooks/useTypes'
+import HomeHero from '../components/HomeHero'
 import PokemonCard from '../components/PokemonCard'
-import Pagination from '../components/Pagination'
-import LoadingGrid from '../components/LoadingGrid'
+import TypeBadge from '../components/TypeBadge'
 import ErrorState from '../components/ErrorState'
-import EmptyState from '../components/EmptyState'
-import SearchBar from '../components/SearchBar'
-import TypeFilter from '../components/TypeFilter'
+import { MAX_POKEMON_ID } from '../utils/pokemon'
 
-const PAGE_SIZE = 20
-const SEARCH_DELAY = 300
+const HERO_COUNT = 6 // Pokémon yang berganti-ganti di hero
+const CARD_COUNT = 8 // kartu "Pilihan acak" di bawahnya
+
+// Pilih beberapa ID acak yang berbeda
+function pickRandomIds(count: number): number[] {
+  const picked = new Set<number>()
+  while (picked.size < count) {
+    picked.add(Math.floor(Math.random() * MAX_POKEMON_ID) + 1)
+  }
+  return [...picked]
+}
 
 export default function HomePage() {
-  const [searchParams, setSearchParams] = useSearchParams()
+  // Local state: ID acak, dibuat sekali tiap kunjungan ke beranda
+  const [randomIds] = useState(() => pickRandomIds(HERO_COUNT + CARD_COUNT))
 
-  // State dari URL (sumber kebenaran untuk search, type, dan page)
-  const q = searchParams.get('q') ?? ''
-  const type = searchParams.get('type') ?? ''
-  const requestedPage = Number(searchParams.get('page')) || 1
-
-  // State lokal: isi kotak search (supaya mengetik terasa langsung)
-  const [input, setInput] = useState(q)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  // Data dari API
   const indexQuery = usePokemonIndex()
   const typesQuery = useTypes()
-  const typeIdsQuery = usePokemonIdsByType(type)
 
-  // Bersihkan timer kalau halaman ditutup
-  useEffect(() => {
-    return () => clearTimeout(timeoutRef.current)
-  }, [])
-
-  // Ubah beberapa parameter URL sekaligus. Nilai kosong = hapus parameter.
-  function updateParams(changes: Record<string, string>, replace = false) {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        Object.entries(changes).forEach(([key, value]) => {
-          if (value) next.set(key, value)
-          else next.delete(key)
-        })
-        return next
-      },
-      { replace },
-    )
-  }
-
-  function handleSearchChange(value: string) {
-    setInput(value)
-    clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => {
-      updateParams({ q: value.trim(), page: '' }, true)
-    }, SEARCH_DELAY)
-  }
-
-  function handleTypeChange(value: string) {
-    updateParams({ type: value, page: '' })
-  }
-
-  function handleReset() {
-    clearTimeout(timeoutRef.current)
-    setInput('')
-    updateParams({ q: '', type: '', page: '' })
-  }
-
-  function handlePageChange(newPage: number) {
-    updateParams({ page: String(newPage) })
-    window.scrollTo({ top: 0 })
-  }
-
-  // Gabungkan search dan type
-  const filtered = useMemo(() => {
-    if (!indexQuery.data) return []
-
-    const keyword = q.toLowerCase().replace(/\s+/g, '-')
-    const typeIds = typeIdsQuery.data ? new Set(typeIdsQuery.data) : null
-
-    return indexQuery.data.filter((pokemon) => {
-      const matchName = !keyword || pokemon.name.includes(keyword)
-      const matchType = type === '' || (typeIds !== null && typeIds.has(pokemon.id))
-      return matchName && matchType
-    })
-  }, [indexQuery.data, typeIdsQuery.data, q, type])
-
-  const hasActiveFilter = q !== '' || type !== ''
-
-  // Tentukan isi area hasil
-  let content
-  if (indexQuery.isPending || typeIdsQuery.isLoading) {
-    content = <LoadingGrid />
-  } else if (indexQuery.isError) {
-    content = <ErrorState message={indexQuery.error.message} onRetry={() => indexQuery.refetch()} />
-  } else if (typeIdsQuery.isError) {
-    content = <ErrorState message={typeIdsQuery.error.message} onRetry={() => typeIdsQuery.refetch()} />
-  } else if (filtered.length === 0) {
-    content = (
-      <div className="space-y-4 text-center">
-        <EmptyState
-          title="Pokémon tidak ditemukan"
-          description="Coba kata kunci lain atau ganti filter type."
-        />
-        {hasActiveFilter && (
-          <button
-            onClick={handleReset}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            Reset pencarian
-          </button>
-        )}
-      </div>
-    )
-  } else {
-    const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
-    const page = Math.min(Math.max(requestedPage, 1), totalPages)
-    const start = (page - 1) * PAGE_SIZE
-    const pagePokemon = filtered.slice(start, start + PAGE_SIZE)
-
-    content = (
-      <>
-        <p className="mb-3 text-sm text-gray-500">{filtered.length} Pokémon ditemukan</p>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {pagePokemon.map((pokemon) => (
-            <PokemonCard key={pokemon.id} pokemon={pokemon} />
-          ))}
-        </div>
-        <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
-      </>
-    )
-  }
+  // ID -> data ringkas, supaya nama bisa dicari dari ID acak
+  const byId = useMemo(
+    () => new Map((indexQuery.data ?? []).map((pokemon) => [pokemon.id, pokemon])),
+    [indexQuery.data],
+  )
+  const picks = randomIds.flatMap((id) => byId.get(id) ?? [])
+  const heroPokemons = picks.slice(0, HERO_COUNT)
+  const cardPokemons = picks.slice(HERO_COUNT)
 
   return (
-    <section>
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-        <SearchBar value={input} onChange={handleSearchChange} />
-        <TypeFilter
-          types={typesQuery.data ?? []}
-          value={type}
-          onChange={handleTypeChange}
-          disabled={typesQuery.isPending}
-        />
-        {hasActiveFilter && (
-          <button
-            onClick={handleReset}
-            className="rounded-lg bg-white px-4 py-2 shadow hover:bg-gray-100"
-          >
-            Reset
-          </button>
+    <div>
+      {/* ===== Hero full layar (search + Pokémon berganti otomatis) ===== */}
+      <HomeHero
+        pokemons={heroPokemons}
+        isPending={indexQuery.isPending}
+        errorMessage={indexQuery.isError ? indexQuery.error.message : undefined}
+        onRetry={() => indexQuery.refetch()}
+      />
+
+      <div className="space-y-12 pb-8 pt-10">
+        {/* ===== Type sebagai chip ===== */}
+        <section id="jelajah" className="scroll-mt-20">
+          <h2 className="mb-4 text-center text-2xl font-bold">Jelajahi berdasarkan type</h2>
+
+          {typesQuery.isError && (
+            <ErrorState message={typesQuery.error.message} onRetry={() => typesQuery.refetch()} />
+          )}
+
+          {typesQuery.isPending && (
+            <div className="flex flex-wrap justify-center gap-2" aria-hidden="true">
+              {Array.from({ length: 18 }, (_, i) => (
+                <div key={i} className="h-8 w-36 animate-pulse rounded-full bg-gray-200" />
+              ))}
+            </div>
+          )}
+
+          {typesQuery.data && (
+            <ul className="flex flex-wrap justify-center gap-2">
+              {typesQuery.data.map((type) => (
+                <li key={type}>
+                  <Link
+                    to={`/pokedex?type=${type}`}
+                    className="block rounded-full transition hover:-translate-y-0.5 hover:drop-shadow-md"
+                  >
+                    <TypeBadge type={type} className="h-8" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* ===== Pilihan acak ===== */}
+        {cardPokemons.length > 0 && (
+          <section>
+            <h2 className="mb-4 text-center text-2xl font-bold">Pilihan acak</h2>
+
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {cardPokemons.map((pokemon) => (
+                <PokemonCard key={pokemon.id} pokemon={pokemon} />
+              ))}
+            </div>
+
+            <div className="mt-8 text-center">
+              <Link
+                to="/pokedex"
+                className="group inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 font-semibold text-white shadow transition hover:bg-gray-700"
+              >
+                Lihat semua Pokémon
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5 transition group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14m-6-6 6 6-6 6" />
+                </svg>
+              </Link>
+            </div>
+          </section>
         )}
       </div>
-
-      {content}
-    </section>
+    </div>
   )
 }

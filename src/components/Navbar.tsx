@@ -1,10 +1,11 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useFavoritesStore } from '../store/favoritesStore'
+import Pokeball from './Pokeball'
 
 // NavLink memberi tahu kita apakah linknya sedang aktif (isActive)
 function navLinkClass({ isActive }: { isActive: boolean }) {
-  return `rounded-lg px-3 py-2 text-sm font-medium transition ${
-    isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+  return `rounded-full px-3 py-1.5 text-sm font-medium transition sm:px-4 ${
+    isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-black/5'
   }`
 }
 
@@ -12,24 +13,37 @@ export default function Navbar() {
   const favoriteCount = useFavoritesStore((state) => state.ids.length)
 
   return (
-    <header className="sticky top-0 z-10 bg-white shadow">
-      <nav className="mx-auto flex max-w-6xl items-center gap-2 p-3">
-        <Link to="/" className="mr-2 text-lg font-bold">
-          Pokédex
+    // Tinggi tetap 4rem: dipakai HomeHero untuk menaruh hero tepat di bawah navbar.
+    // Latar semi-transparan + blur, jadi warna hero ikut terlihat di belakangnya.
+    <header className="sticky top-0 z-20 h-16 border-b border-black/5 bg-white/70 backdrop-blur-md">
+      <nav className="mx-auto flex h-full max-w-6xl items-center px-4">
+        <Link
+          to="/"
+          aria-label="Pokédex, ke beranda"
+          className="flex items-center gap-2 text-lg font-bold"
+        >
+          <Pokeball tone="color" className="h-8 w-8" />
+          <span className="hidden sm:inline">Pokédex</span>
         </Link>
 
-        <NavLink to="/" end className={navLinkClass}>
-          Beranda
-        </NavLink>
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <NavLink to="/" end className={navLinkClass}>
+            Beranda
+          </NavLink>
 
-        <NavLink to="/favorites" className={navLinkClass}>
-          Favorites
-          {favoriteCount > 0 && (
-            <span className="ml-1 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
-              {favoriteCount}
-            </span>
-          )}
-        </NavLink>
+          <NavLink to="/pokedex" className={navLinkClass}>
+            Jelajahi
+          </NavLink>
+
+          <NavLink to="/favorites" className={navLinkClass}>
+            Favorites
+            {favoriteCount > 0 && (
+              <span className="ml-1.5 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
+                {favoriteCount}
+              </span>
+            )}
+          </NavLink>
+        </div>
       </nav>
     </header>
   )

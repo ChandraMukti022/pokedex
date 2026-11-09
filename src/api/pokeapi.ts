@@ -25,9 +25,7 @@ async function fetchJson<T>(path: string): Promise<T> {
 
 // Semua Pokémon (hanya ID + nama), dibatasi sampai MAX_POKEMON_ID
 export async function fetchPokemonIndex(): Promise<PokemonSummary[]> {
-  const data = await fetchJson<PokemonListResponse>(
-    `/pokemon?limit=${MAX_POKEMON_ID}&offset=0`,
-  )
+  const data = await fetchJson<PokemonListResponse>(`/pokemon?limit=${MAX_POKEMON_ID}&offset=0`)
   return data.results.map(toSummary)
 }
 
@@ -37,12 +35,8 @@ const EXCLUDED_TYPES = ['unknown', 'shadow', 'stellar']
 // Daftar nama type untuk dropdown filter
 export async function fetchTypes(): Promise<string[]> {
   const data = await fetchJson<TypeListResponse>('/type')
-  return data.results
-    .map((item) => item.name)
-    .filter((name) => !EXCLUDED_TYPES.includes(name))
+  return data.results.map((item) => item.name).filter((name) => !EXCLUDED_TYPES.includes(name))
 }
-
-
 
 // ID Pokémon yang punya type tertentu, form khusus dibuang
 export async function fetchPokemonIdsByType(type: string): Promise<number[]> {
@@ -53,8 +47,6 @@ export async function fetchPokemonIdsByType(type: string): Promise<number[]> {
 }
 
 // Detail satu Pokémon berdasarkan ID atau nama
-export async function fetchPokemonDetail(
-  idOrName: string | number,
-): Promise<PokemonDetail> {
+export async function fetchPokemonDetail(idOrName: string | number): Promise<PokemonDetail> {
   return fetchJson<PokemonDetail>(`/pokemon/${idOrName}`)
 }

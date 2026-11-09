@@ -20,9 +20,7 @@ export default function FavoriteButton({
       onClick={() => toggleFavorite(pokemonId)}
       aria-pressed={isFavorite}
       aria-label={
-        isFavorite
-          ? `Hapus ${pokemonName} dari favorit`
-          : `Tambahkan ${pokemonName} ke favorit`
+        isFavorite ? `Hapus ${pokemonName} dari favorit` : `Tambahkan ${pokemonName} ke favorit`
       }
       className={`flex items-center justify-center rounded-full bg-white/90 text-xl shadow transition hover:scale-110 ${
         isFavorite ? 'text-red-500' : 'text-gray-400'

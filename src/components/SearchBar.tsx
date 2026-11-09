@@ -22,7 +22,7 @@ export default function SearchBar({ value, onChange, onSubmit }: SearchBarProps)
         type="search"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Cari nama Pokémon..."
+        placeholder="Cari nama atau nomor Pokémon..."
         aria-label="Cari Pokémon"
         className="min-w-0 flex-1 bg-transparent px-4 py-2 text-base focus:outline-none"
       />

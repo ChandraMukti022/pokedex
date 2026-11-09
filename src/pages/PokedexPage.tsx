@@ -22,7 +22,11 @@ export default function PokedexPage() {
 
   // State dari URL (sumber kebenaran untuk search, type, dan page)
   const q = searchParams.get('q') ?? ''
-  const type = searchParams.get('type') ?? ''
+  const rawType = searchParams.get('type') ?? ''
+  const typesQuery = useTypes()
+
+  // Type dari URL hanya dipakai kalau ada di daftar type resmi (mis. ?type=abc diabaikan)
+  const type = typesQuery.data?.includes(rawType) ? rawType : ''
   const requestedPage = Number(searchParams.get('page')) || 1
 
   // State lokal: isi kotak search (supaya mengetik terasa langsung)
@@ -39,7 +43,7 @@ export default function PokedexPage() {
 
   // Data dari API
   const indexQuery = usePokemonIndex()
-  const typesQuery = useTypes()
+
   const typeIdsQuery = usePokemonIdsByType(type)
 
   // Bersihkan timer kalau halaman ditutup
@@ -96,10 +100,15 @@ export default function PokedexPage() {
     if (!indexQuery.data) return []
 
     const keyword = q.toLowerCase().replace(/\s+/g, '-')
+    // "25" atau "#25" dianggap pencarian nomor
+    const numericKeyword = /^#?\d+$/.test(keyword) ? Number(keyword.replace('#', '')) : null
     const typeIds = typeIdsQuery.data ? new Set(typeIdsQuery.data) : null
 
     return indexQuery.data.filter((pokemon) => {
-      const matchName = !keyword || pokemon.name.includes(keyword)
+      const matchName =
+        !keyword ||
+        pokemon.name.includes(keyword) ||
+        (numericKeyword !== null && pokemon.id === numericKeyword)
       const matchType = type === '' || (typeIds !== null && typeIds.has(pokemon.id))
       return matchName && matchType
     })
@@ -109,7 +118,7 @@ export default function PokedexPage() {
 
   // Tentukan isi area hasil
   let content
-  if (indexQuery.isPending || typeIdsQuery.isLoading) {
+  if (indexQuery.isPending || typeIdsQuery.isLoading || (rawType !== '' && typesQuery.isPending)) {
     content = <PageLoader label="Memuat Pokémon..." />
   } else if (indexQuery.isError) {
     content = <ErrorState message={indexQuery.error.message} onRetry={() => indexQuery.refetch()} />

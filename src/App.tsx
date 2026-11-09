@@ -1,5 +1,7 @@
 import { Routes, Route, Link } from 'react-router-dom'
 
+   import HomePage from './pages/HomePage'
+
 export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -10,7 +12,7 @@ export default function App() {
 
       <main className="mx-auto max-w-6xl p-4">
         <Routes>
-          <Route path="/" element={<p>Home (listing)</p>} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/pokemon/:id" element={<p>Detail</p>} />
           <Route path="/favorites" element={<p>Favorites</p>} />
           <Route path="*" element={<p>404 Not Found</p>} />

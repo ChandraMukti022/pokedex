@@ -3,6 +3,9 @@ import type { NamedResource, PokemonSummary } from '../types/pokemon'
 // Pokémon dengan ID di atas ini adalah form khusus (mega, gmax, dll.)
 export const MAX_POKEMON_ID = 1025
 
+// Stat yang ditampilkan sebagai "serangan" di kartu dan halaman detail
+export const ATTACK_STATS = ['attack', 'special-attack']
+
 // "https://pokeapi.co/api/v2/pokemon/25/" -> 25
 export function extractId(url: string): number {
   const parts = url.split('/').filter(Boolean)

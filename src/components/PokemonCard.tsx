@@ -3,6 +3,7 @@ import type { PokemonSummary } from '../types/pokemon'
 import { usePokemonDetail } from '../hooks/usePokemonDetail'
 import { getCardStyle } from '../utils/typeStyles'
 import {
+  ATTACK_STATS,
   buildImageUrl,
   formatHeight,
   formatId,
@@ -12,8 +13,6 @@ import {
 } from '../utils/pokemon'
 import FavoriteButton from './FavoriteButton'
 import TypeBadge from './TypeBadge'
-
-const ATTACK_STATS = ['attack', 'special-attack']
 
 interface PokemonCardProps {
   pokemon: PokemonSummary

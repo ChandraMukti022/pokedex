@@ -3,7 +3,7 @@
 Aplikasi web Pokédex berbasis React yang mengambil data dari [PokéAPI](https://pokeapi.co/docs/v2).
 Dibuat sebagai Frontend Technical Assessment.
 
-**Demo:** GANTI-dengan-link-deployment (opsional, hapus baris ini kalau tidak ada)
+***Demo:** https://pokedex-theta-khaki.vercel.app
 
 ## Fitur
 

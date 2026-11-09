@@ -9,7 +9,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
     'rounded-lg bg-white px-4 py-2 shadow disabled:cursor-not-allowed disabled:opacity-50'
 
   return (
-    <div className="mt-6 flex items-center justify-center gap-4">
+       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
       <button
         className={buttonClass}
         disabled={page <= 1}

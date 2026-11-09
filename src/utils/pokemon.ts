@@ -31,3 +31,27 @@ export function formatName(name: string): string {
 export function formatId(id: number): string {
   return `#${String(id).padStart(3, '0')}`
 }
+
+// 4 -> "0.4 m" (API memberi satuan desimeter)
+export function formatHeight(decimeters: number): string {
+  return `${(decimeters / 10).toFixed(1)} m`
+}
+
+// 60 -> "6.0 kg" (API memberi satuan hektogram)
+export function formatWeight(hectograms: number): string {
+  return `${(hectograms / 10).toFixed(1)} kg`
+}
+
+const STAT_LABELS: Record<string, string> = {
+  hp: 'HP',
+  attack: 'Attack',
+  defense: 'Defense',
+  'special-attack': 'Sp. Atk',
+  'special-defense': 'Sp. Def',
+  speed: 'Speed',
+}
+
+// "special-attack" -> "Sp. Atk"
+export function formatStatName(name: string): string {
+  return STAT_LABELS[name] ?? formatName(name)
+}

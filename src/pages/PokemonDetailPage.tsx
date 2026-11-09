@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { usePokemonDetail } from '../hooks/usePokemonDetail'
 import TypeBadge from '../components/TypeBadge'
 import StatBar from '../components/StatBar'
+import FavoriteButton from '../components/FavoriteButton'
 import ErrorState from '../components/ErrorState'
 import EmptyState from '../components/EmptyState'
 import {
@@ -90,14 +91,21 @@ export default function PokemonDetailPage() {
           />
 
           <div className="flex-1 space-y-5">
-            <header>
-              <p className="text-gray-500">{formatId(data.id)}</p>
-              <h1 className="text-3xl font-bold">{formatName(data.name)}</h1>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {data.types.map((item) => (
-                  <TypeBadge key={item.type.name} type={item.type.name} />
-                ))}
+                       <header className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-gray-500">{formatId(data.id)}</p>
+                <h1 className="text-3xl font-bold">{formatName(data.name)}</h1>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {data.types.map((item) => (
+                    <TypeBadge key={item.type.name} type={item.type.name} />
+                  ))}
+                </div>
               </div>
+              <FavoriteButton
+                pokemonId={data.id}
+                pokemonName={formatName(data.name)}
+                className="h-12 w-12 shrink-0 text-3xl"
+              />
             </header>
 
             <dl className="grid grid-cols-2 gap-4">

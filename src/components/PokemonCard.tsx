@@ -35,7 +35,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
     <div className="group relative">
       <Link
         to={`/pokemon/${pokemon.id}`}
-        className={`flex aspect-[5/7] rounded-xl bg-linear-to-br p-[3.5%] shadow-md transition duration-200 group-hover:-translate-y-1 group-hover:shadow-xl ${style.frame}`}
+        className={`flex rounded-xl lg:aspect-[5/7] bg-linear-to-br p-[3.5%] shadow-md transition duration-200 group-hover:-translate-y-1 group-hover:shadow-xl ${style.frame}`}
       >
         <div className={`flex min-w-0 flex-1 flex-col rounded-lg p-2 ${style.body}`}>
           {/* Header: nama, HP, ikon type */}
@@ -55,7 +55,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
 
           {/* Bingkai gambar: mengisi sisa ruang (fleksibel) */}
           <div
-            className={`relative mt-1.5 min-h-24 flex-1 overflow-hidden rounded-md border-2 border-amber-300 bg-linear-to-br shadow-inner ${style.art}`}
+            className={`relative mt-1.5 h-28 flex-none overflow-hidden lg:h-auto lg:min-h-24 lg:flex-1 rounded-md border-2 border-amber-300 bg-linear-to-br shadow-inner ${style.art}`}
           >
             <img
               src={buildImageUrl(pokemon.id)}
@@ -73,7 +73,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
           </p>
 
           {/* Isi: ability dan serangan */}
-          <div className="mt-1.5 shrink-0 space-y-1 text-[11px]">
+          <div className="mt-1.5 min-h-[4.25rem] shrink-0 space-y-1 text-[11px]">
             {data ? (
               <>
                 {ability && (
@@ -104,7 +104,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
           </div>
 
           {/* Footer: type dan nomor (disisakan ruang untuk tombol hati) */}
-          <div className="mt-1 flex shrink-0 items-center justify-between pr-9 pt-1 text-[10px] text-gray-500">
+          <div className="mt-1 flex h-7 shrink-0 items-center justify-between pr-9 text-[10px] text-gray-500">
             <span>{mainType && <TypeBadge type={mainType} className="h-4" />}</span>
             <span>{formatId(pokemon.id)}</span>
           </div>
@@ -114,7 +114,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
       <FavoriteButton
         pokemonId={pokemon.id}
         pokemonName={name}
-        className="absolute bottom-3 right-3 h-8 w-8"
+        className="absolute bottom-3 right-3 h-7 w-7"
       />
     </div>
   )
